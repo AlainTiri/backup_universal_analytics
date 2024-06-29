@@ -56,9 +56,31 @@ def fetch_all_data(report_request):
     return all_rows
 
 
+def fetch(request):
+    # Execute the report and fetch data
+    all_rows = fetch_all_data(request)
+
+    # Extract data into a Pandas DataFrame
+    rows = []
+    for report_row in all_rows:
+        row = {}
+        for i, dimension in enumerate(report_row['dimensions']):
+            row[request['dimensions'][i]['name']] = dimension
+        for i, metric in enumerate(report_row['metrics'][0]['values']):
+            row[request['metrics'][i]['expression']] = metric
+        rows.append(row)
+
+    df = pd.DataFrame(rows)
+
+    # Rename columns to remove the 'ga:' prefix
+    df.columns = [name[3:] for name in df.columns]
+
+    return df
+
+
 # Report configuration
 full_report_request = {
-    'viewId': '135967274',  # Replace with your Google Analytics view ID
+    'viewId': '',  # Replace with your Google Analytics view ID
     'dateRanges': [{'startDate': '2016-01-01', 'endDate': '2026-07-01'}],  # Date range
     'metrics': [
         {'expression': 'ga:pageViews'},  # Number of page views
@@ -80,58 +102,24 @@ full_report_request = {
     'pageSize': 10000  # Maximum number of rows per page (can be up to 10000)
 }
 
-dimensions_names = ['channelGrouping', 'deviceCategory', 'language', 'Country'
+dimensions_names = ['channelGrouping', 'deviceCategory', 'language'  #, 'Country'
   ]
 
 # Report configuration
 responsive_report_request = {
-    'viewId': '135967274',  # Replace with your Google Analytics view ID
-    'dateRanges': [{'startDate': '2016-01-01', 'endDate': '2024-07-01'}],  # Date range
+    'viewId': '',  # Replace with your Google Analytics view ID
+    'dateRanges': [{'startDate': '2016-01-01', 'endDate': '2024-10-01'}],  # Date range
     'metrics': [
         {'expression': 'ga:pageViews'},  # Number of page views
         {'expression': 'ga:sessions'},  # Number of sessions
         {'expression': 'ga:sessionsWithEvent'},  # Number of sessions
         {'expression': 'ga:newUsers'}  # Number of new users
-    ],   # Number of page views
-    'dimensions': [
-        {'name': 'ga:date'}
-  ],
+    ],
     'pageSize': 10000  # Maximum number of rows per page (can be up to 10000)
 }
 
 
-def fetch(request):
-    # Execute the report and fetch data
-    all_rows = fetch_all_data(responsive_report_request)
-
-    # Extract data into a Pandas DataFrame
-    rows = []
-    for report_row in all_rows:
-        row = {}
-        for i, dimension in enumerate(report_row['dimensions']):
-            row[request['dimensions'][i]['name']] = dimension
-        for i, metric in enumerate(report_row['metrics'][0]['values']):
-            row[request['metrics'][i]['expression']] = metric
-        rows.append(row)
-
-    df = pd.DataFrame(rows)
-
-    # Add a column for the full page URL
-    # df['ga:fullPageUrl'] = df['ga:hostname'] + df['ga:pagePath']
-
-    # Rename columns to remove the 'ga:' prefix
-    df.columns = [name[3:] for name in df.columns]
-
-    return df
-
-
 requests: list = []
-
-responsive_report_request['dimensions'] = [
-        {'name': 'ga:date'}, {}
-  ]
-
-dimensions_values = [{'name': 'ga:date'}]
 
 for name in dimensions_names:
     print(name)
@@ -144,7 +132,7 @@ for name in dimensions_names:
 for request in requests:
     print(request.keys())
     print(request['dimensions'])
-    df = fetch(responsive_report_request)
+    df = fetch(request)
 
     name = request['dimensions'][-1]['name'][3:]
 
