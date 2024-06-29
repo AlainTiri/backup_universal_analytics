@@ -20,7 +20,7 @@ pip install google-auth google-auth-oauthlib google-auth-httplib2 google-api-pyt
 ## The content
 There are one full request adapted for me and a loop through divers dimensions.
 
-You need a specific service account on GCP for Google Analytics. It's easy to find on Youtube.
+You need a specific service account (add his .json file on a config directory to create) on GCP for Google Analytics. It's easy to find on Youtube.
 
 Normally, if you can code, there is no difficulties (except maybe GCP and GAU config). My code is basic and write with ChatGPT...
 
