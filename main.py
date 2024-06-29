@@ -7,6 +7,7 @@ import pandas as pd
 # Replace 'config/service-account.json' with the path to your service account key file
 SCOPES = ['https://www.googleapis.com/auth/analytics.readonly']
 SERVICE_ACCOUNT_FILE = 'config/service-account.json'
+viewID = ''    # Fill with your Google Analytics view ID
 
 
 def get_google_analytics_reporting_service():
@@ -80,7 +81,7 @@ def fetch(request):
 
 # Report configuration
 full_report_request = {
-    'viewId': '',  # Replace with your Google Analytics view ID
+    'viewId': viewID,  # Replace with your Google Analytics view ID
     'dateRanges': [{'startDate': '2016-01-01', 'endDate': '2026-07-01'}],  # Date range
     'metrics': [
         {'expression': 'ga:pageViews'},  # Number of page views
@@ -107,7 +108,7 @@ dimensions_names = ['channelGrouping', 'deviceCategory', 'language'  #, 'Country
 
 # Report configuration
 responsive_report_request = {
-    'viewId': '',  # Replace with your Google Analytics view ID
+    'viewId': viewID,
     'dateRanges': [{'startDate': '2016-01-01', 'endDate': '2024-10-01'}],  # Date range
     'metrics': [
         {'expression': 'ga:pageViews'},  # Number of page views
@@ -118,9 +119,8 @@ responsive_report_request = {
     'pageSize': 10000  # Maximum number of rows per page (can be up to 10000)
 }
 
-
+# loop to construct the list of requests to send
 requests: list = []
-
 for name in dimensions_names:
     print(name)
     dimensions_values: list[dict] = [{'name': 'ga:date'}, {'name': f'ga:{name}'}]
@@ -128,9 +128,8 @@ for name in dimensions_names:
     new_request['dimensions'] = dimensions_values
     requests.append(new_request)
 
-
+# Loop through requests to fetch
 for request in requests:
-    print(request.keys())
     print(request['dimensions'])
     df = fetch(request)
 
